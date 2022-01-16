@@ -1,5 +1,5 @@
 CREATE TABLE pokemon (
-		id INT PRIMARY KEY AUTO_INCREMENT,
-        type VARCHAR(30),
-        level INT,
-        fighter BOOLEAN)
+		id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+        type VARCHAR(30) NOT NULL,
+        level INT NOT NULL,
+        fighter BOOLEAN NOT NULL)

@@ -19,7 +19,7 @@ public class MysqlTest {
 		
 		try {
 			stmt = connection.createStatement();
-			String query1 = "INSERT INTO pokemon (type) " + "VALUES ('HORSEA')";
+			String query1 = "INSERT INTO pokemon (type, level, fighter) " + "VALUES ('HORSEA', 1, FALSE)";
 			stmt.executeUpdate(query1);
 			
 		} catch (SQLException e1) {
@@ -39,7 +39,6 @@ public class MysqlTest {
 			}
 
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
