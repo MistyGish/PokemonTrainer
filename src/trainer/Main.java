@@ -4,6 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -26,7 +32,6 @@ public class Main {
 		ArrayList<Pokemon> ownedPokemon = new ArrayList<>();
 
 		loadTeam(ownedPokemon);
-		saveTeam(ownedPokemon);
 
 		// Loop to allow the user to choose from the menu
 		while (true) {
@@ -68,8 +73,23 @@ public class Main {
 	public static void firstRun(ArrayList<Pokemon> owned) {
 		Pokemon firstPokemon = new Pokemon();
 		firstPokemon.type = PokemonType.getRandom();
+		String type = firstPokemon.type.toString();
 		firstPokemon.level = 1;
 		firstPokemon.fighter = true;
+
+		Connection connection = getConnection();
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			stmt = connection.prepareStatement("INSERT INTO pokemon (type, level, fighter) VALUES (?, ?, ?)");
+			stmt.setString(1, type);
+			stmt.setInt(2, firstPokemon.level);
+			stmt.setBoolean(3, firstPokemon.fighter);
+			stmt.executeUpdate();
+
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 
 		owned.add(firstPokemon);
 	}
@@ -108,8 +128,6 @@ public class Main {
 			else if (choice == 2) {
 				capture(owned, enemy);
 			}
-
-			saveTeam(owned);
 		}
 
 		else {
@@ -169,7 +187,6 @@ public class Main {
 		int setFighter = input.nextInt();
 		owned.get(setFighter - 1).fighter = true;
 
-		saveTeam(owned);
 	}
 
 	public static void releasePokemon(ArrayList<Pokemon> owned, Scanner input) {
@@ -191,20 +208,27 @@ public class Main {
 
 			else {
 				owned.remove(removePokemon - 1);
-				saveTeam(owned);
 			}
 		}
 	}
 
 	public static void loadTeam(ArrayList<Pokemon> owned) {
-		try {
-			File myObj = new File("team.txt");
-			Scanner myReader = new Scanner(myObj);
-			while (myReader.hasNext()) {
+		// create a new connection
+		Connection connection = getConnection();
+		System.out.println("connection: " + connection);
 
-				String type = myReader.next();
-				int level = myReader.nextInt();
-				boolean fighter = myReader.nextBoolean();
+		Statement stmt = null; // Executing SQL statement called stmt
+		ResultSet rs = null; // Database ResultSet from stmt execution called rs
+
+		try {
+			stmt = connection.createStatement();
+			String query = "SELECT * FROM pokemon";
+			rs = stmt.executeQuery(query);
+
+			while (rs.next()) {
+				String type = rs.getString("type");
+				int level = rs.getInt("level");
+				boolean fighter = rs.getBoolean("fighter");
 
 				Pokemon pokemon = new Pokemon();
 				pokemon.type = PokemonType.valueOf(type);
@@ -212,8 +236,8 @@ public class Main {
 				pokemon.fighter = fighter;
 				owned.add(pokemon);
 			}
-		} catch (FileNotFoundException e) {
-
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
 
 		if (owned.isEmpty()) {
@@ -224,18 +248,17 @@ public class Main {
 		}
 	}
 
-	public static void saveTeam(ArrayList<Pokemon> owned) {
+	private static Connection getConnection() {
 		try {
-			File arList = new File("team.txt");
-			FileWriter myWriter = new FileWriter(arList);
-
-			for (int i = 0; i < owned.size(); i++) {
-				myWriter.write(owned.get(i).type + " " + owned.get(i).level + " " + owned.get(i).fighter + " ");
-			}
-			myWriter.close();
-		} catch (IOException e) {
-			System.out.println("Error occurred.");
-			e.printStackTrace();
+			String url = "jdbc:mysql://localhost:3306/pokemondb";
+			String username = "root";
+			String password = "123456";
+			Connection connection = DriverManager.getConnection(url, username, password);
+			return connection;
+		} catch (SQLException e) {
+			System.out.println(e);
 		}
+		return null;
 	}
+
 }

@@ -12,19 +12,7 @@ public class MysqlTest {
 		// create a new connection
 		Connection connection = getConnection();
 		System.out.println("connection: " + connection);
-
-		// insert a new pokemon
-		Statement stmt = null;
 		ResultSet rs = null;
-		
-		try {
-			stmt = connection.createStatement();
-			String query1 = "INSERT INTO pokemon (type, level, fighter) " + "VALUES ('HORSEA', 1, FALSE)";
-			stmt.executeUpdate(query1);
-			
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
 
 		// query all pokemon and print them
 		Statement stmt2 = null;
