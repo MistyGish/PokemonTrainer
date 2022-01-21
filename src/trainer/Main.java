@@ -165,9 +165,11 @@ public class Main {
 					System.out.println("You won!");
 					if (pokemon.level < maximum) {
 						Connection con = getConnection();
+						pokemon.level++;
 						try {
+							Statement stmt1 = con.createStatement();
 							PreparedStatement stmt = con.prepareStatement("UPDATE pokemon SET level = (?) WHERE fighter = 1");
-							stmt.setInt(1, pokemon.level + 1);
+							stmt.setInt(1, pokemon.level);
 							stmt.executeUpdate();
 						} catch (SQLException e) {
 							e.printStackTrace();
@@ -196,7 +198,7 @@ public class Main {
 					// Insert Pokemon into database if enemy is caught
 					Connection connection = getConnection();
 					PreparedStatement stmt = null;
-					ResultSet rs = null;
+					
 					try {
 						String type = randEnemy.type.toString();
 						stmt = connection.prepareStatement("INSERT INTO pokemon (type, level, fighter) VALUES (?, ?, ?)");
