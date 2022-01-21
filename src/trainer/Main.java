@@ -164,6 +164,23 @@ public class Main {
 			if (owned.get(i).fighter) {
 				if (owned.get(i).getAttackValue() >= randEnemy.getAttackValue()) {
 					System.out.println("You got them!");
+
+					// Insert Pokemon into database if enemy is caught
+					Connection connection = getConnection();
+					PreparedStatement stmt = null;
+					ResultSet rs = null;
+					try {
+						String type = randEnemy.type.toString();
+						stmt = connection.prepareStatement("INSERT INTO pokemon (type, level, fighter) VALUES (?, ?, ?)");
+						stmt.setString(1, type);
+						stmt.setInt(2, randEnemy.level);
+						stmt.setBoolean(3, randEnemy.fighter);
+						stmt.executeUpdate();
+
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
+
 					owned.add(randEnemy);
 				} else {
 					System.out.println("They got away...");
