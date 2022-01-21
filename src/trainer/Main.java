@@ -79,7 +79,6 @@ public class Main {
 
 		Connection connection = getConnection();
 		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		try {
 			stmt = connection.prepareStatement("INSERT INTO pokemon (type, level, fighter) VALUES (?, ?, ?)");
 			stmt.setString(1, type);
@@ -97,9 +96,29 @@ public class Main {
 	// Show team of Pokemon currently owned
 	public static void listTeam(ArrayList<Pokemon> owned) {
 		System.out.println("Here is your team!");
-		for (int i = 0; i < owned.size(); i++) {
-			System.out.println((i + 1) + ". " + owned.get(i).getPokemonInfo());
+		
+		Connection connection = getConnection();
+		ResultSet rs = null;
+
+		// Query all pokemon from team and print them
+		Statement stmt2 = null;
+		try {
+			stmt2 = connection.createStatement();
+			String query = "SELECT * FROM pokemon";
+			rs = stmt2.executeQuery(query);
+
+			while (rs.next()) {
+				String type = rs.getString("type");
+				int level = rs.getInt("level");
+				int id = rs.getInt("id");
+				Boolean fighter = rs.getBoolean("fighter");
+				System.out.println(id + ": " + type + ", " + level + ", " + fighter);
+			}
+
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
+
 	}
 
 	// Allows the chance to explore and possibly encounter wild Pokemon
@@ -145,7 +164,16 @@ public class Main {
 				if (pokemon.getAttackValue() >= randEnemy.getAttackValue()) {
 					System.out.println("You won!");
 					if (pokemon.level < maximum) {
-						pokemon.level++;
+						Connection con = getConnection();
+						try {
+							PreparedStatement stmt = con.prepareStatement("UPDATE pokemon SET level = (?) WHERE fighter = 1");
+							stmt.setInt(1, pokemon.level + 1);
+							stmt.executeUpdate();
+						} catch (SQLException e) {
+							e.printStackTrace();
+						}
+						
+
 					} else {
 						System.out.println(pokemon.type + " is at the max level!");
 					}
@@ -194,16 +222,21 @@ public class Main {
 		System.out.println("Which Pokemon do you want to fight? Enter the index: ");
 
 		// Change current fighter to FALSE
-		for (int i = 0; i < owned.size(); i++) {
-			if (owned.get(i).fighter) {
-				owned.get(i).fighter = false;
-			}
+		Connection connection = getConnection();
+		Statement stmt = null;
+		try {
+			stmt = connection.createStatement();
+			String query = "UPDATE pokemon SET fighter = 0 WHERE fighter = 1";
+			stmt.execute(query);
+			
+			// Set user chosen fighter to TRUE
+			int setFighter = input.nextInt();
+			PreparedStatement stmt2 = connection.prepareStatement("UPDATE pokemon SET fighter = 1 WHERE id = (?)");
+			stmt2.setInt(1, setFighter);
+			stmt2.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-
-		// Set user chosen fighter to TRUE
-		int setFighter = input.nextInt();
-		owned.get(setFighter - 1).fighter = true;
-
 	}
 
 	public static void releasePokemon(ArrayList<Pokemon> owned, Scanner input) {
@@ -215,16 +248,16 @@ public class Main {
 			System.out.println("Which Pokemon do you want to release? Enter the index: ");
 			int removePokemon = input.nextInt();
 
-			if (removePokemon > owned.size()) {
-				System.out.println("That index doesn't exist.");
-			}
+			Connection connection = getConnection();
+			PreparedStatement stmt = null;
+			ResultSet rs = null;
+			try {
+				stmt = connection.prepareStatement("DELETE FROM pokemon WHERE id = (?)");
+				stmt.setInt(1, removePokemon);
+				stmt.executeUpdate();
 
-			else if (owned.get(removePokemon - 1).fighter) {
-				System.out.println("You can't release the fighter!");
-			}
-
-			else {
-				owned.remove(removePokemon - 1);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
 			}
 		}
 	}
