@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -167,8 +168,7 @@ public class Main {
 						Connection con = getConnection();
 						pokemon.level++;
 						try {
-							Statement stmt1 = con.createStatement();
-							PreparedStatement stmt = con.prepareStatement("UPDATE pokemon SET level = (?) WHERE fighter = 1");
+							PreparedStatement stmt = con.prepareStatement("UPDATE pokemon SET level = (?) WHERE fighter = TRUE");
 							stmt.setInt(1, pokemon.level);
 							stmt.executeUpdate();
 						} catch (SQLException e) {
@@ -228,12 +228,12 @@ public class Main {
 		Statement stmt = null;
 		try {
 			stmt = connection.createStatement();
-			String query = "UPDATE pokemon SET fighter = 0 WHERE fighter = 1";
+			String query = "UPDATE pokemon SET fighter = FALSE WHERE fighter = TRUE";
 			stmt.execute(query);
 			
 			// Set user chosen fighter to TRUE
 			int setFighter = input.nextInt();
-			PreparedStatement stmt2 = connection.prepareStatement("UPDATE pokemon SET fighter = 1 WHERE id = (?)");
+			PreparedStatement stmt2 = connection.prepareStatement("UPDATE pokemon SET fighter = TRUE WHERE id = (?)");
 			stmt2.setInt(1, setFighter);
 			stmt2.executeUpdate();
 		} catch (SQLException e1) {
@@ -253,11 +253,19 @@ public class Main {
 			Connection connection = getConnection();
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
+			
 			try {
 				stmt = connection.prepareStatement("DELETE FROM pokemon WHERE id = (?)");
 				stmt.setInt(1, removePokemon);
 				stmt.executeUpdate();
-
+				
+				Pokemon pokemon = new Pokemon();
+				for (int i = 0; i < owned.size(); i++) {
+					if (pokemon.id == removePokemon) {
+						owned.remove(i);
+					}
+				}
+				
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}

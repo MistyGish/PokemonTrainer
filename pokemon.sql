@@ -1,5 +1,3 @@
-CREATE TABLE pokemon (
-		id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-        type VARCHAR(30) NOT NULL,
-        level INT NOT NULL,
-        fighter BOOLEAN NOT NULL)
+    
+    
+    

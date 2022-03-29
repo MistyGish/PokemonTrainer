@@ -7,6 +7,7 @@ public class Pokemon {
 	int level;
 	boolean fighter;
 	PokemonType type;
+	int id;
 	
 	public String getPokemonInfo() {
 		return "Type: " + type + ", " + "Level: " + level + ", " + "Fighter: " + fighter;
